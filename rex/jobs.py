@@ -95,8 +95,7 @@ def fetch():
         errorResponse = responses.createResponse('x9001','Contraint Failure')
         return make_response(jsonify(errorResponse)),500
 
-    if(data != None):
-        print("hello")
+    if(len(data) > 0):
         has_active = True
     else:
         query = 'SELECT * FROM JOB WHERE user_id != ? AND is_complete = 0 AND is_accepted = 0'
