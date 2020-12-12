@@ -86,7 +86,7 @@ def fetch():
     current_app.logger.debug("found user_details as %s",user_details)
 
     has_active = False
-    query = 'SELECT * FROM JOB WHERE worker = ? AND is_complete = 0'
+    query = 'SELECT * FROM JOB WHERE worker = ? AND is_complete = 0 AND is_accepted = 1'
     data = None
     try:
         data = db.execute(query,(int(current_identity),)).fetchall()
@@ -96,9 +96,11 @@ def fetch():
         return make_response(jsonify(errorResponse)),500
 
     if(data != None):
+        print("hello")
         has_active = True
     else:
         query = 'SELECT * FROM JOB WHERE user_id != ? AND is_complete = 0 AND is_accepted = 0'
+        print((int(current_identity),))
         try:
             data = db.execute(query,(int(current_identity),)).fetchall()
             print(len(data))
@@ -171,7 +173,11 @@ def refresh():
             'poster' : row['poster'],
             'user_id' : row['user_id'],
             'updated_at' : row['updated'], 
-            'job_id' : row['job_id']
+            'job_id' : row['job_id'],
+            'payment_status' : row['payment_status'],
+            'is_accepted' : row['is_accepted'],
+            'is_complete' : row['is_complete'],
+            'otp' : row['otp']
         }
         jobs_list.append(job)
 
