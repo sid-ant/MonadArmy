@@ -7,6 +7,9 @@ import { HiCurrencyRupee } from "react-icons/hi";
 import { AiOutlineTool } from "react-icons/ai";
 
 class JobCard extends Component {
+  acceptJob = () => {
+    console.log("Accepted Job id" + this.props.job_id);
+  };
   render() {
     return (
       <Card
@@ -40,7 +43,7 @@ class JobCard extends Component {
               color: "black",
             }}
           >
-            REPAIR
+            {this.props.category}
           </span>
           &nbsp;&nbsp;&nbsp;&nbsp;
           <AiOutlineTool
@@ -68,7 +71,9 @@ class JobCard extends Component {
           {/* Show price */}
 
           {/* Show description */}
-          <Card.Text style={{ fontSize: "12px", fontWeight: "light" }}>
+          <Card.Text
+            style={{ fontSize: "12px", marginTop: "10px", fontWeight: "light" }}
+          >
             {this.props.description}
           </Card.Text>
           {/* Show description */}
@@ -82,7 +87,9 @@ class JobCard extends Component {
             }}
           >
             <div style={{ fontSize: "10px", color: "grey" }}>
-              221b Baker's Street,London
+              {this.props.location}
+              <br />
+              Posted by: {this.props.poster}
             </div>
           </div>
           <div
@@ -93,6 +100,7 @@ class JobCard extends Component {
             }}
           >
             <Button
+              onClick={() => this.acceptJob()}
               variant="primary"
               style={{
                 border: "0px",
