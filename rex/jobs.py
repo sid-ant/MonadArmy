@@ -89,7 +89,7 @@ def fetch():
     query = 'SELECT * FROM JOB WHERE worker = ? AND is_complete = 0'
     data = None
     try:
-        data = db.execute(query,(int(current_identity),)).fetchone()
+        data = db.execute(query,(int(current_identity),)).fetchall()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
         errorResponse = responses.createResponse('x9001','Contraint Failure')
@@ -99,10 +99,9 @@ def fetch():
         has_active = True
     else:
         query = 'SELECT * FROM JOB WHERE user_id != ? AND is_complete = 0 AND is_accepted = 0'
-        data = None
         try:
-            print(user_id)
             data = db.execute(query,(int(current_identity),)).fetchall()
+            print(len(data))
         except sqlite3.Error as er:
             current_app.logger.debug("SQL Lite Error : %s",er)
             errorResponse = responses.createResponse('x9001','Contraint Failure')
@@ -124,7 +123,7 @@ def fetch():
         jobs_list.append(job)
 
     body = {
-        "has_active_jobs" : True,
+        "has_active_jobs" : has_active,
         "jobs_list" : jobs_list
     }
 
@@ -197,5 +196,42 @@ def refresh():
         "status":"200",
         "message":"Job Created", 
         "body": body
+    }
+    return make_response(jsonify(responseObject)),200
+
+@bp.route('/accept',methods=['POST'])
+@login_required
+def accept():
+    req =  request.get_json()
+
+    job_id = req.get("job_id") # String 
+    utils.nullCheck(job_id,"job_id")
+    
+    db = get_db()
+
+    user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
+    
+    if user_details is None:
+        errResp = responses.createResponse('500','User Account Not Found: Please report this to us')
+        return make_response(jsonify(errResp)),500
+
+    current_app.logger.debug("found user_details as %s",user_details)
+
+
+    query = 'Update JOB SET is_accepted = 1, worker = '+str(user_details['user_id']) + ' WHERE  job_id = '+ str(job_id);
+    try:
+        db.execute(query)
+        db.commit()
+    except sqlite3.Error as er:
+        current_app.logger.debug("SQL Lite Error : %s",er)
+        errorResponse = responses.createResponse('x9001','Contraint Failure')
+        return make_response(jsonify(errorResponse)),500
+
+    
+
+    responseObject = {
+        "status":"200",
+        "message":"success", 
+        "body": None
     }
     return make_response(jsonify(responseObject)),200
