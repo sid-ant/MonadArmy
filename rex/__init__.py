@@ -1,6 +1,8 @@
 import os
 
 from flask import Flask, request
+from flask_cors import CORS
+
 import logging
 
 
@@ -11,6 +13,7 @@ def create_app(test_config=None):
         SECRET_KEY="dev", 
         DATABASE=os.path.join(app.instance_path, 'rex.sqlite'),
     )
+
 
     # app.config.from_json('development.json') -- add a private key here 
 
@@ -44,5 +47,7 @@ def create_app(test_config=None):
         app.logger.debug("%s",response.get_json())
         return response
 
+    CORS(app)
+    
     return app
 
