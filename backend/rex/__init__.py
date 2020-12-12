@@ -33,6 +33,9 @@ def create_app(test_config=None):
     from . import hello
     app.register_blueprint(hello.bp)
 
+    from . import jobs
+    app.register_blueprint(jobs.bp)
+
     @app.before_request
     def logrequest():
         app.logger.debug("%s",request)
