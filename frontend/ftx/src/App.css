@@ -3,11 +3,12 @@
 }
 
 .sort-button {
-  font-size: 12px;
-  border: 1px solid black;
+  font-size: 10px;
+  border: 1px solid lightgrey;
   background: transparent;
+  color: black;
   margin: 0 5px;
-  padding: 5px 10px;
+  padding: 5px 12px;
   border-radius: 100px;
 }
 
@@ -27,26 +28,26 @@
   }
 }
 a.nav-link.active {
-  background: #252B29 !important;
+  background: #252b29 !important;
   color: #fff !important;
 }
-a{
-  color: #252B29;
+a {
+  color: #252b29;
 }
-.title{
+.title {
   text-align: center;
   width: 100%;
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
 }
-.signUp{
+.signUp {
   margin: 10px;
   width: 100%;
 }
-.successText{
-  color: #4BB543;
+.successText {
+  color: #4bb543;
   text-align: center;
 }
-.navs{
+.navs {
   width: 100%;
   padding: 10px;
 }

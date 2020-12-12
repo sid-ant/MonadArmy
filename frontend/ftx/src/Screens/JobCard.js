@@ -2,54 +2,114 @@
 import "../App.css";
 import { Card, Button } from "react-bootstrap";
 import { Component } from "react";
+import { GoCheck } from "react-icons/go";
+import { HiCurrencyRupee } from "react-icons/hi";
+import { AiOutlineTool } from "react-icons/ai";
 
 class JobCard extends Component {
   render() {
     return (
       <Card
         style={{
-          width: "calc(90% - 20px)",
+          width: "90%",
           padding: "10px",
-          background: "black",
-          color: "white",
+          background: "white",
+          color: "black",
           boxShadow: "0px 0px 22px -15px grey",
           border: "1px solid lightgrey",
-          borderRadius: "0px",
+          borderRadius: "15px",
           marginLeft: "5%",
           marginTop: "20px",
         }}
       >
-        {/* <Card.Img
-          variant="top"
+        <div
           style={{
-            opacity: 0.7,
-            background: "black",
-            width: "100%",
-            height: "150px",
+            position: "absolute",
+            right: "20px",
+            top: "13px",
+            border: "1px dashed lightgrey",
+            borderRadius: "100px",
+            padding: "0 20px",
           }}
-          src="https://images.ctfassets.net/zma7thmmcinb/6NkrAIY4Jo5fjCKULa6n4C/80593107e9a046a9883f5fa3b1530bcb/gardening-reduces-stress-preview2.jpg"
-        /> */}
+        >
+          <span
+            style={{
+              position: "relative",
+              top: "-2px",
+              fontSize: "10px",
+              color: "black",
+            }}
+          >
+            REPAIR
+          </span>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <AiOutlineTool
+            style={{
+              position: "absolute",
+              top: "5px",
+              right: "6px",
+              fontSize: "15px",
+            }}
+          />
+        </div>
+
         <Card.Body style={{ padding: "5px 10px" }}>
           <Card.Title style={{ fontSize: "18px", fontWeight: "bold" }}>
             {this.props.title}
-            {this.props.price}
           </Card.Title>
-          <Card.Text style={{ fontSize: "14px", fontWeight: "light" }}>
-            Some quick example text to build on the card title and make up the
-            bulk of the card's content.
+
+          {/* Show price */}
+          <div style={{ fontSize: "14px", fontWeight: "bold" }}>
+            <HiCurrencyRupee
+              style={{ position: "relative", top: "5px", fontSize: "20px" }}
+            />{" "}
+            {this.props.price}
+          </div>
+          {/* Show price */}
+
+          {/* Show description */}
+          <Card.Text style={{ fontSize: "12px", fontWeight: "light" }}>
+            {this.props.description}
           </Card.Text>
-          <Button
-            variant="primary"
+          {/* Show description */}
+
+          {/* Show location and accept button */}
+          <div
             style={{
-              border: "0px",
-              width: "100%",
-              background: "black",
-              color: "white",
-              padding: "10px 20px",
+              display: "inline-block",
+              width: "50%",
+              textAlign: "left",
             }}
           >
-            Accept
-          </Button>
+            <div style={{ fontSize: "10px", color: "grey" }}>
+              221b Baker's Street,London
+            </div>
+          </div>
+          <div
+            style={{
+              display: "inline-block",
+              width: "50%",
+              textAlign: "right",
+            }}
+          >
+            <Button
+              variant="primary"
+              style={{
+                border: "0px",
+                background: "black",
+                color: "white",
+                borderRadius: "100px",
+                padding: "10px 20px",
+                fontSize: "12px",
+              }}
+            >
+              Accept &nbsp;
+              <GoCheck
+                style={{ position: "relative", top: "2px", color: "white" }}
+              />
+            </Button>
+          </div>
+          {/* Show location and accept button */}
         </Card.Body>
       </Card>
     );
