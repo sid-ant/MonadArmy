@@ -158,15 +158,7 @@ class SignUp extends Component {
                         </Container>
                       );
 
-    }
-    return (
-      <Container>
-        <Row>
-          <Col>1 of 1</Col>
-          <Button onClick={this.login}>Click HEre</Button>
-        </Row>
-      </Container>
-    );
+    
   }
 }
 

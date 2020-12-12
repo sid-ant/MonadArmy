@@ -1,8 +1,7 @@
 import React from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 
-import SignUp from "./Screens/SignUp";
-import Home from "./Screens/Home";
+
 
 import SignUp from "./Screens/SignUp";
 import Home from "./Screens/Home";
