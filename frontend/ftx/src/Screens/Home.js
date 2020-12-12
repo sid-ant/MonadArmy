@@ -2,6 +2,9 @@
 import "../App.css";
 import { Component } from "react";
 import JobCard from "./JobCard.js";
+import { TiLocationArrowOutline } from "react-icons/ti";
+import { BiPowerOff } from "react-icons/bi";
+import SignUp from "./SignUp";
 
 class Home extends Component {
   constructor() {
@@ -49,8 +52,12 @@ class Home extends Component {
         timeposted: "today",
       },
     ];
-    this.state = { tasks };
+    this.state = { tasks , logout:false};
   }
+  logOut =(e)=>{
+    localStorage.removeItem("session_info")
+    this.setState({logout:true})
+  } 
 
   sortByName = (key, direction) => {
     var tempTask = this.state.tasks;
@@ -81,37 +88,84 @@ class Home extends Component {
   };
 
   render() {
+    if (!localStorage.getItem("session_info") || this.state.logout){return (<SignUp></SignUp>)}
     return (
-      <div>
-        <div
-          style={{
-            width: "calc(90% - 20px)",
-            marginLeft: "5%",
-            marginTop: "20px",
-            fontSize: "10px",
-          }}
-        >
-          Sort By:
-          <button
-            className="sort-button priceTrue"
-            onClick={() => this.sortByName("price", true)}
+      <div style={{ paddingBottom: "40px" }}>
+        <div style={{ background: "black" }}>
+          <BiPowerOff
+            style={{
+              color: "white",
+              fontSize: "30px",
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+            }} onClick = {this.logOut}
+          />
+          <div
+            style={{
+              background: "black",
+              color: "white",
+              padding: "40px",
+              fontSize: "22px",
+              fontWeight: "bold",
+            }}
           >
-            Price Low to High
-          </button>
-          <button
-            className="sort-button priceFalse"
-            onClick={() => this.sortByName("price", false)}
+            <TiLocationArrowOutline
+              style={{
+                color: "white",
+                fontSize: "30px",
+                position: "relative",
+                top: "7px",
+                left: "-10px",
+              }}
+            />
+            Jobs Near You
+          </div>
+          <div
+            style={{
+              fontSize: "10px",
+              borderRadius: "50px 50px 0px 0px",
+              background: "white",
+              paddingTop: "50px",
+            }}
           >
-            Price High to Low
-          </button>
-          <button
-            className="sort-button titleTrue"
-            onClick={() => this.sortByName("title", true)}
-          >
-            Title
-          </button>
+            <div
+              style={{
+                fontSize: "14px",
+                width: "90%",
+                marginLeft: "5%",
+              }}
+            >
+              <div
+                style={{
+                  marginLeft: "10px",
+                  marginBottom: "10px",
+                  fontWeight: "bold",
+                }}
+              >
+                Sort By:
+              </div>
+              <button
+                className="sort-button priceTrue"
+                onClick={() => this.sortByName("price", true)}
+              >
+                Price Low to High
+              </button>
+              <button
+                className="sort-button priceFalse"
+                onClick={() => this.sortByName("price", false)}
+              >
+                Price High to Low
+              </button>
+              <button
+                className="sort-button titleTrue"
+                onClick={() => this.sortByName("title", true)}
+              >
+                Title
+              </button>
+            </div>
+          </div>
         </div>
-
         {this.state.tasks.map((person, i) => (
           <JobCard
             title={this.state.tasks[i].title}
