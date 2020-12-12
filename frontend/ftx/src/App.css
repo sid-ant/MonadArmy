@@ -1,0 +1,75 @@
+.App {
+  text-align: center;
+}
+
+.sort-button {
+  font-size: 12px;
+  border: 1px solid black;
+  background: transparent;
+  margin: 0 5px;
+  padding: 5px 10px;
+  border-radius: 100px;
+}
+
+.sort-button.active {
+  background: black;
+  color: white;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+a.nav-link.active {
+  background: #252B29 !important;
+  color: #fff !important;
+}
+a{
+  color: #252B29;
+}
+.title{
+  text-align: center;
+  width: 100%;
+  font-family: 'Press Start 2P', cursive;
+}
+.signUp{
+  margin: 10px;
+  width: 100%;
+}
+.successText{
+  color: #4BB543;
+  text-align: center;
+}
+.navs{
+  width: 100%;
+  padding: 10px;
+}
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
