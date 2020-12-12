@@ -1,17 +1,16 @@
 // import logo from './logo.svg';
 import "../App.css";
-import { Container, Col, Row, Button } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 import Home from "./Home.js";
-import NewJob from "./NewJob.js";
-import { Redirect, Route } from "react-router-dom";
 import { Component } from "react";
-import Alert from "react-bootstrap/Alert";
-// import * as utils from '../maze.js';
+import React from "react";
 class SignUp extends Component {
   state = {
     logged: false,
     isSignUp: false,
     showSignUpSuccess: false,
+    showSignUpFail: false,
+    loggingError: false,
   };
   scriptLoaded() {
     window.main();
@@ -25,22 +24,82 @@ class SignUp extends Component {
 
     document.body.appendChild(script);
   }
-  signUpCall = () => {
+  signUpCall = (e) => {
+    e.preventDefault();
     try {
       var nameD = document.getElementById("exampleInputName").value;
       var emailD = document.getElementById("exampleInputEmail1").value;
       var passD = document.getElementById("exampleInputPassword1").value;
-      if (nameD.length > 0 && emailD.length > 0 && passD.length > 0) {
-        fetch("https://run.mocky.io/v3/1e00d44c-c695-40da-8af7-af765c63f201", {
+      var upiD = document.getElementById("exampleInputUPI").value;
+      var phoneD = document.getElementById("exampleInputPhone").value;
+
+      if (
+        nameD.length > 0 &&
+        emailD.length > 0 &&
+        passD.length > 0 &&
+        upiD.length > 0
+      ) {
+        var data;
+        if (phoneD.length > 0) {
+          data = {
+            name: nameD,
+            email: emailD,
+            password: passD,
+            upi: upiD,
+            phone: phoneD,
+          };
+        } else {
+          data = { name: nameD, email: emailD, password: passD, upi: upiD };
+        }
+        fetch("https://sleepy-wildwood-72790.herokuapp.com/auth/register", {
           method: "POST",
           headers: {
-            Accept: "application/json, text/plain, */*",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: nameD, email: emailD, pass: passD }),
+          body: JSON.stringify(data),
         })
-          .then(this.setState({ isSignUp: false, showSignUpSuccess: true }))
-          .then(this.tabSwitchToLogin());
+          .then((response) => {
+            response.json();
+            if (
+              response.status &&
+              (response.status === 200 || response.status === 201)
+            ) {
+              this.setState({ isSignUp: false, showSignUpSuccess: true });
+              fetch("https://sleepy-wildwood-72790.herokuapp.com/auth/login", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: emailD, password: passD }),
+              })
+                .then((response) => {
+                  console.log(response);
+                  if (
+                    response.status &&
+                    (response.status === 200 || response.status === 201)
+                  ) {
+                    return response.json();
+                  } else {
+                    throw new Error("No rep");
+                  }
+                })
+                .then((data) => {
+                  console.log(data);
+                  localStorage.setItem("session_info", data.token);
+                  this.setState({ logged: true });
+                })
+                .catch((e) => {
+                  this.setState({ isSignUp: false, loggingError: true });
+                });
+              // this.tabSwitchToLogin()
+            } else {
+              this.setState({ isSignUp: true, showSignUpFail: true });
+            }
+          })
+          .then(this.setState({ isSignUp: false }))
+          .catch((err) => {
+            this.setState({ isSignUp: true, showSignUpFail: true });
+          });
       } else {
         alert("Please fill all Values");
       }
@@ -48,21 +107,38 @@ class SignUp extends Component {
       alert("Please enter proper values");
     }
   };
-  loginCall = () => {
+  loginCall = (event) => {
     try {
       var emailD = document.getElementById("exampleInputEmail2").value;
       var passD = document.getElementById("exampleInputPassword2").value;
       if (emailD.length > 0 && passD.length > 0) {
-        fetch("https://run.mocky.io/v3/1e00d44c-c695-40da-8af7-af765c63f201", {
+        event.preventDefault();
+        fetch("https://sleepy-wildwood-72790.herokuapp.com/auth/login", {
           method: "POST",
           headers: {
-            Accept: "application/json, text/plain, */*",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email: emailD, pass: passD }),
+          body: JSON.stringify({ email: emailD, password: passD }),
         })
-          .then(this.setState({ isSignUp: false, logged: true }))
-          .then(localStorage.setItem("session_info", emailD));
+          .then((response) => {
+            console.log(response);
+            if (
+              response.status &&
+              (response.status === 200 || response.status === 201)
+            ) {
+              return response.json();
+            } else {
+              throw new Error("No rep");
+            }
+          })
+          .then((data) => {
+            console.log(data);
+            localStorage.setItem("session_info", data.token);
+            this.setState({ logged: true });
+          })
+          .catch((e) => {
+            this.setState({ isSignUp: false, loggingError: true });
+          });
       } else {
         alert("Please fill all Values");
       }
@@ -73,16 +149,26 @@ class SignUp extends Component {
   tabSwitchToSign = () => {
     document.getElementById("login").classList.remove("active");
     document.getElementById("sign").classList.add("active");
-    this.setState({ isSignUp: true, showSignUpSuccess: false });
+    this.setState({
+      isSignUp: true,
+      showSignUpSuccess: false,
+      showSignUpFail: false,
+      loggingError: false,
+    });
   };
   tabSwitchToLogin = () => {
     document.getElementById("sign").classList.remove("active");
     document.getElementById("login").classList.add("active");
-    this.setState({ isSignUp: false, showSignUpSuccess: false });
+    this.setState({
+      isSignUp: false,
+      showSignUpSuccess: false,
+      showSignUpFail: false,
+      loggingError: false,
+    });
   };
   render() {
     if (localStorage.getItem("session_info")) {
-      return <NewJob></NewJob>;
+      return <Home></Home>;
     }
     return (
       <Container>
@@ -115,9 +201,16 @@ class SignUp extends Component {
           <Row>
             <div className="card signUp">
               <div className="card-body">
+                {this.state.showSignUpFail ? (
+                  <Row>
+                    <p className="failureText">SignUp Failed</p>
+                  </Row>
+                ) : (
+                  <Row></Row>
+                )}
                 <form>
                   <div className="form-group">
-                    <label for="exampleInputEmail1">Email address</label>
+                    <label>Email address*</label>
                     <input
                       type="email"
                       className="form-control"
@@ -130,7 +223,7 @@ class SignUp extends Component {
                     </small>
                   </div>
                   <div className="form-group">
-                    <label for="exampleInputName">Name</label>
+                    <label>Name*</label>
                     <input
                       type="text"
                       className="form-control"
@@ -139,7 +232,25 @@ class SignUp extends Component {
                     ></input>
                   </div>
                   <div className="form-group">
-                    <label for="exampleInputPassword1">Password</label>
+                    <label>UPI*</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="exampleInputUPI"
+                      placeholder="Enter UPI Id"
+                    ></input>
+                  </div>
+                  <div className="form-group">
+                    <label>Phone</label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      id="exampleInputPhone"
+                      placeholder="Enter Phone number"
+                    ></input>
+                  </div>
+                  <div className="form-group">
+                    <label>Password*</label>
                     <input
                       type="password"
                       className="form-control"
@@ -147,6 +258,9 @@ class SignUp extends Component {
                       placeholder="Password"
                     ></input>
                   </div>
+                  <small id="emailHelp" className="form-text text-muted">
+                    * are required
+                  </small>
                   <button
                     type="submit"
                     className="btn btn-dark btn-block"
@@ -168,12 +282,21 @@ class SignUp extends Component {
                       Sign Up Successful. Please login.
                     </p>
                   </Row>
+                ) : this.state.showSignUpFail ? (
+                  <Row>
+                    <p className="failureText">SignUp Failed</p>
+                  </Row>
                 ) : (
                   <Row></Row>
                 )}
+                {this.state.loggingError ? (
+                  <p className="errorText">Incorrect login info</p>
+                ) : (
+                  <p></p>
+                )}
                 <form>
                   <div className="form-group">
-                    <label for="exampleInputEmail1">Email address</label>
+                    <label>Email address</label>
                     <input
                       type="email"
                       className="form-control"
@@ -183,7 +306,7 @@ class SignUp extends Component {
                     ></input>
                   </div>
                   <div className="form-group">
-                    <label for="exampleInputPassword1">Password</label>
+                    <label>Password</label>
                     <input
                       type="password"
                       className="form-control"

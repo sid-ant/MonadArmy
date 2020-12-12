@@ -6,6 +6,7 @@ import { TiLocationArrowOutline } from "react-icons/ti";
 import { BiPowerOff } from "react-icons/bi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { GoListUnordered } from "react-icons/go";
+import SignUp from "./SignUp";
 
 class Home extends Component {
   constructor() {
@@ -53,7 +54,7 @@ class Home extends Component {
         timeposted: "today",
       },
     ];
-    this.state = { tasks: tasks, loading: true };
+    this.state = { logout: false, tasks: tasks, loading: true };
   }
 
   componentDidMount() {
@@ -103,6 +104,10 @@ class Home extends Component {
       tasks: response.jobs,
     });
   }
+  logOut = (e) => {
+    localStorage.removeItem("session_info");
+    this.setState({ ...this.state, logout: true });
+  };
 
   sortByName = (key, direction) => {
     var tempTask = this.state.tasks;
@@ -147,6 +152,9 @@ class Home extends Component {
         />
       );
     }
+    if (!localStorage.getItem("session_info") || this.state.logout) {
+      return <SignUp></SignUp>;
+    }
     return (
       <div style={{ paddingBottom: "60px" }}>
         <div style={{ background: "black" }}>
@@ -181,6 +189,7 @@ class Home extends Component {
               top: "20px",
               right: "20px",
             }}
+            onClick={this.logOut}
           />
           <div
             style={{
