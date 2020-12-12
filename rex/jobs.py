@@ -150,19 +150,7 @@ def refresh():
 
     user_id = user_details['user_id'] # String
 
-    query = 'SELECT * FROM JOB WHERE worker = ? AND is_complete = 0'
-    data = None
-    try:
-        data = db.execute(query,(int(current_identity),)).fetchone()
-    except sqlite3.Error as er:
-        current_app.logger.debug("SQL Lite Error : %s",er)
-        errorResponse = responses.createResponse('x9001','Contraint Failure')
-        return make_response(jsonify(errorResponse)),500
-
-    if(data != None):
-        print(data['title'])
-
-    query = 'SELECT * FROM JOB WHERE user_id != ? AND is_complete = 0 AND is_accepted = 0'
+    query = 'SELECT * FROM JOB WHERE user_id = ?'
     data = None
     try:
         print(user_id)
@@ -188,7 +176,6 @@ def refresh():
         jobs_list.append(job)
 
     body = {
-        "has_active_jobs" : True,
         "jobs_list" : jobs_list
     }
 
@@ -218,7 +205,7 @@ def accept():
     current_app.logger.debug("found user_details as %s",user_details)
 
 
-    query = 'Update JOB SET is_accepted = 1, worker = '+str(user_details['user_id']) + ' WHERE  job_id = '+ str(job_id);
+    query = 'Update JOB SET is_accepted = 1, worker = '+str(user_details['user_id']) + ' WHERE  job_id = '+ str(job_id)
     try:
         db.execute(query)
         db.commit()
