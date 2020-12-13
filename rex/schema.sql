@@ -35,7 +35,7 @@ CREATE TABLE job (
 );
 
 
-CREATE TABLE "transaction" (
+CREATE TABLE TXNS (
   txn_id INTEGER PRIMARY KEY AUTOINCREMENT, 
   order_id TEXT NOT NULL, 
   order_status TEXT NOT NULL,

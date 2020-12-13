@@ -27,11 +27,13 @@ def create():
     job_id = req.get("job_id") 
     utils.nullCheck(job_id,"job_id") # String  
 
+    db = get_db()
+
     url = 'https://api.razorpay.com/v1/orders'
 
     # take this from prod config -- not tracked on git, don't commit these even once
-    username = " "
-    password = " "
+    username = current_app.config['RP_API_KEY']
+    password = current_app.config['RP_SECRET']
 
     finalAmount = amount * 100
     order_req = {
@@ -39,8 +41,8 @@ def create():
         "currency" : "INR"
     }
 
-    resp = requests.post(url,json=req,auth=requests.auth.HTTPBasicAuth(username, password))
-    current_app.logger.debug("got order create api raw response as %s",resp)
+    resp = requests.post(url,json=order_req,auth=(username, password))
+    current_app.logger.debug("got order create api raw response as %s",resp.content)
 
 
     if resp.status_code != 200: 
