@@ -16,7 +16,10 @@ class MyJobCard extends Component {
     script.async = true;
     document.body.appendChild(script);
   }
-
+  handleDelClick(e){
+    alert("Job Deleted. Refund initiated")
+    window.location.href = "/"
+  }
   handleClick(e) {
     // e.preventDefault();
     console.log("The link was clicked.");
@@ -277,7 +280,8 @@ class MyJobCard extends Component {
                 &nbsp;Pay
               </Button>
             )}
-            {/* <Button
+            <Button
+              onClick={() => this.handleDelClick()}
               variant="primary"
               style={{
                 border: "0px",
@@ -293,7 +297,7 @@ class MyJobCard extends Component {
                 style={{ position: "relative", top: "2px", color: "black" }}
               />
               &nbsp;Delete
-            </Button> */}
+            </Button>
           </div>
           {/* Show location and accept button */}
         </Card.Body>
