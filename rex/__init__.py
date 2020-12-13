@@ -2,11 +2,12 @@ import os
 
 from flask import Flask, request
 import logging
-
+from flask_cors import CORS
 
 def create_app(test_config=None):
 
     app = Flask(__name__, instance_relative_config=True)
+    CORS(app)
     app.config.from_mapping(
         SECRET_KEY="dev", 
         DATABASE=os.path.join(app.instance_path, 'rex.sqlite'),
@@ -35,6 +36,9 @@ def create_app(test_config=None):
 
     from . import jobs
     app.register_blueprint(jobs.bp)
+
+    from . import txns
+    app.register_blueprint(txns.bp)
 
     @app.before_request
     def logrequest():

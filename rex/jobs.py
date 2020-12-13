@@ -36,6 +36,7 @@ def create():
     utils.nullCheck(location,"location")
     
     db = get_db()
+    cursor = db.cursor()
 
     user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
     
@@ -52,16 +53,20 @@ def create():
 
     query = 'INSERT into JOB (user_id,title,location,detail,category,price,poster,payment_status,otp,is_complete) VALUES (?,?,?,?,?,?,?,?,?,?)'
     try:
-        db.execute(query,(int(current_identity),title,location,detail,category,amount,name,"initiated",otp,0))
+        cursor.execute(query,(int(current_identity),title,location,detail,category,amount,name,"initiated",otp,0))
         db.commit()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
         errorResponse = responses.createResponse('x9001','Contraint Failure')
         return make_response(jsonify(errorResponse)),500
 
+    # job_id_q = db.execute('select last_insert_rowid() as id')
+    # job_id = job_id_q['id']    
+
     body = {
         "payment_status" : "initiated",
-        "otp" : otp
+        "otp" : otp,
+        "job_id" : cursor.lastrowid
     }
 
     responseObject = {
@@ -86,23 +91,23 @@ def fetch():
     current_app.logger.debug("found user_details as %s",user_details)
 
     has_active = False
-    query = 'SELECT * FROM JOB WHERE worker = ? AND is_complete = 0'
+    query = 'SELECT * FROM JOB WHERE worker = ? AND is_complete = 0 AND is_accepted = 1'
     data = None
     try:
-        data = db.execute(query,(int(current_identity),)).fetchone()
+        data = db.execute(query,(int(current_identity),)).fetchall()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
         errorResponse = responses.createResponse('x9001','Contraint Failure')
         return make_response(jsonify(errorResponse)),500
 
-    if(data != None):
+    if(len(data) > 0):
         has_active = True
     else:
         query = 'SELECT * FROM JOB WHERE user_id != ? AND is_complete = 0 AND is_accepted = 0'
-        data = None
+        print((int(current_identity),))
         try:
-            print(user_id)
             data = db.execute(query,(int(current_identity),)).fetchall()
+            print(len(data))
         except sqlite3.Error as er:
             current_app.logger.debug("SQL Lite Error : %s",er)
             errorResponse = responses.createResponse('x9001','Contraint Failure')
@@ -124,7 +129,7 @@ def fetch():
         jobs_list.append(job)
 
     body = {
-        "has_active_jobs" : True,
+        "has_active_jobs" : has_active,
         "jobs_list" : jobs_list
     }
 
@@ -151,19 +156,7 @@ def refresh():
 
     user_id = user_details['user_id'] # String
 
-    query = 'SELECT * FROM JOB WHERE worker = ? AND is_complete = 0'
-    data = None
-    try:
-        data = db.execute(query,(int(current_identity),)).fetchone()
-    except sqlite3.Error as er:
-        current_app.logger.debug("SQL Lite Error : %s",er)
-        errorResponse = responses.createResponse('x9001','Contraint Failure')
-        return make_response(jsonify(errorResponse)),500
-
-    if(data != None):
-        print(data['title'])
-
-    query = 'SELECT * FROM JOB WHERE user_id != ? AND is_complete = 0 AND is_accepted = 0'
+    query = 'SELECT * FROM JOB WHERE user_id = ?'
     data = None
     try:
         print(user_id)
@@ -184,12 +177,15 @@ def refresh():
             'poster' : row['poster'],
             'user_id' : row['user_id'],
             'updated_at' : row['updated'], 
-            'job_id' : row['job_id']
+            'job_id' : row['job_id'],
+            'payment_status' : row['payment_status'],
+            'is_accepted' : row['is_accepted'],
+            'is_complete' : row['is_complete'],
+            'otp' : row['otp']
         }
         jobs_list.append(job)
 
     body = {
-        "has_active_jobs" : True,
         "jobs_list" : jobs_list
     }
 
@@ -197,5 +193,42 @@ def refresh():
         "status":"200",
         "message":"Job Created", 
         "body": body
+    }
+    return make_response(jsonify(responseObject)),200
+
+@bp.route('/accept',methods=['POST'])
+@login_required
+def accept():
+    req =  request.get_json()
+
+    job_id = req.get("job_id") # String 
+    utils.nullCheck(job_id,"job_id")
+    
+    db = get_db()
+
+    user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
+    
+    if user_details is None:
+        errResp = responses.createResponse('500','User Account Not Found: Please report this to us')
+        return make_response(jsonify(errResp)),500
+
+    current_app.logger.debug("found user_details as %s",user_details)
+
+
+    query = 'Update JOB SET is_accepted = 1, worker = '+str(user_details['user_id']) + ' WHERE  job_id = '+ str(job_id)
+    try:
+        db.execute(query)
+        db.commit()
+    except sqlite3.Error as er:
+        current_app.logger.debug("SQL Lite Error : %s",er)
+        errorResponse = responses.createResponse('x9001','Contraint Failure')
+        return make_response(jsonify(errorResponse)),500
+
+    
+
+    responseObject = {
+        "status":"200",
+        "message":"success", 
+        "body": None
     }
     return make_response(jsonify(responseObject)),200
