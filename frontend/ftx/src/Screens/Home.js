@@ -221,8 +221,8 @@ class Home extends Component {
                   Price H to L
                 </button>
                 <button
-                  className="sort-button updated_atTrue"
-                  onClick={() => this.sortByName("updated_at", true)}
+                  className="sort-button updated_atFalse"
+                  onClick={() => this.sortByName("updated_at", false)}
                 >
                   Recent First
                 </button>
