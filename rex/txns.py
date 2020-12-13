@@ -33,8 +33,8 @@ def create():
     url = 'https://api.razorpay.com/v1/orders'
 
     # take this from prod config -- not tracked on git, don't commit these even once
-    username = current_app.config['RP_API_KEY']
-    password = current_app.config['RP_SECRET']
+    username = utils.RP_API_KEY
+    password = utils.RP_SECRET
 
     finalAmount = int(amount * 100)
     order_req = {
@@ -82,9 +82,18 @@ def create():
 @login_required
 def update():
     req =  request.get_json()
-    
-    success = req.get("success")
-    utils.nullCheck(success,"success") # String  
+
+    payment_id = req.get("razorpay_payment_id")
+    utils.nullCheck(payment_id,"payment_id") # String  
+
+    r_order_id = req.get("razorpay_order_id")
+    utils.nullCheck(r_order_id,"r_order_id") # String  
+
+    signature =  req.get("razorpay_signature")
+    utils.nullCheck(signature,"signature") # String  
+
+    # success = req.get("success")
+    # utils.nullCheck(success,"success") # String  
 
     job_id = req.get("job_id")
     utils.nullCheck(job_id,"job_id") # String  
@@ -97,15 +106,15 @@ def update():
     cursor = db.cursor()
 
 
-    order_status = "APPROVED" if success else "FAILED"
-    payment_status = 1 if success else 0 
+    order_status = "APPROVED" # if success else "FAILED"
+    payment_status = 1 # if success else 0 
 
 
     updateJobs = 'UPDATE job SET payment_status =? WHERE job_id =?'
-    updateTxns = 'UPDATE txns SET order_status =? WHERE txn_id=?' 
+    updateTxns = 'UPDATE txns SET order_status =?,payment_id=?,r_order_id=?,signature=? WHERE txn_id=?' 
     try:
         cursor.execute(updateJobs,(payment_status,job_id))
-        cursor.execute(updateTxns,(order_status,txn_id))
+        cursor.execute(updateTxns,(order_status,payment_id,r_order_id,signature,txn_id))
         db.commit()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
@@ -113,7 +122,7 @@ def update():
         return make_response(jsonify(errorResponse)),500
     
     resp = responses.createResponse('200','Job marked '+order_status)
-    return make_response(jsonify(resp)),500
+    return make_response(jsonify(resp)),200
     
 @bp.route('/payout',methods=['POST'])
 @login_required
@@ -122,27 +131,28 @@ def payout():
 
     txn_type = "OUTBOUND"
 
-    otp = req.get("amount") # Real  
-    utils.nullCheck(amount,"amount")
+    otp = req.get("otp") # Real  
+    utils.nullCheck(otp,"otp")
     
     job_id = req.get("job_id") 
     utils.nullCheck(job_id,"job_id") # String  
 
     url = 'https://api.razorpay.com/v1/payouts'
     db = get_db()
+    cursor = db.cursor()
 
     # take this from prod config -- not tracked on git, don't commit these even once
-    username = current_app.config['RP_API_KEY']
-    password = current_app.config['RP_SECRET']
+    username = utils.RP_API_KEY
+    password = utils.RP_SECRET
 
-    job_details = db.execute('SELECT * FROM job WHERE job_id = ?',(int(job_id),)).fetchone()
+    job_details = cursor.execute('SELECT * FROM job WHERE job_id = ?',(int(job_id),)).fetchone()
     
     if job_details is None:
-        errResp = responses.createResponse('500','Job id Not Found: Please report this to us')
-        return make_response(jsonify(errResp)),500
+        errResp = responses.createResponse('400','Job id Not Found: Please report this to us' + str(job_id))
+        return make_response(jsonify(errResp)),400
     
     if job_details['otp'] != otp:
-        errResp = responses.createResponse('500','Job id Not Found: Please report this to us')
+        errResp = responses.createResponse('500','INVALID OTP')
         return make_response(jsonify(errResp)),500
 
     user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
@@ -161,7 +171,9 @@ def payout():
 
     account_number = '2323230030756441'
 
+    amount = job_details['price']
     finalAmount = int(amount * 100)
+
     order_req = {
         "account_number": account_number,
         "amount": finalAmount,
@@ -195,7 +207,7 @@ def payout():
 
     query = 'INSERT into TXNS (amount,order_id,order_status,job_id,txn_type) VALUES (?,?,?,?,?)'
     try:
-        db.execute(query,(amount,order_id,order_status,job_id,txn_type))
+        cursor.execute(query,(amount,order_id,order_status,job_id,txn_type))
         db.commit()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
