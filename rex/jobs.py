@@ -48,7 +48,7 @@ def create():
 
     name = user_details['name'] # String
 
-    otp = random.randrange(11111,999999)
+    otp = random.randrange(0000,9999)
 
 
     query = 'INSERT into JOB (user_id,title,location,detail,category,price,poster,payment_status,otp,is_complete) VALUES (?,?,?,?,?,?,?,?,?,?)'
