@@ -82,9 +82,18 @@ def create():
 @login_required
 def update():
     req =  request.get_json()
-    
-    success = req.get("success")
-    utils.nullCheck(success,"success") # String  
+
+    payment_id = req.get("razorpay_payment_id")
+    utils.nullCheck(payment_id,"payment_id") # String  
+
+    r_order_id = req.get("razorpay_order_id")
+    utils.nullCheck(r_order_id,"r_order_id") # String  
+
+    signature =  req.get("razorpay_signature")
+    utils.nullCheck(signature,"signature") # String  
+
+    # success = req.get("success")
+    # utils.nullCheck(success,"success") # String  
 
     job_id = req.get("job_id")
     utils.nullCheck(job_id,"job_id") # String  
@@ -97,15 +106,15 @@ def update():
     cursor = db.cursor()
 
 
-    order_status = "APPROVED" if success else "FAILED"
-    payment_status = 1 if success else 0 
+    order_status = "APPROVED" # if success else "FAILED"
+    payment_status = 1 # if success else 0 
 
 
     updateJobs = 'UPDATE job SET payment_status =? WHERE job_id =?'
-    updateTxns = 'UPDATE txns SET order_status =? WHERE txn_id=?' 
+    updateTxns = 'UPDATE txns SET order_status =?,payment_id=?,r_order_id=?,signature=? WHERE txn_id=?' 
     try:
         cursor.execute(updateJobs,(payment_status,job_id))
-        cursor.execute(updateTxns,(order_status,txn_id))
+        cursor.execute(updateTxns,(order_status,payment_id,r_order_id,signature,txn_id))
         db.commit()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
@@ -113,7 +122,7 @@ def update():
         return make_response(jsonify(errorResponse)),500
     
     resp = responses.createResponse('200','Job marked '+order_status)
-    return make_response(jsonify(resp)),500
+    return make_response(jsonify(resp)),200
     
 @bp.route('/payout',methods=['POST'])
 @login_required
