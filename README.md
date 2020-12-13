@@ -2,9 +2,17 @@
 
 RazorPay Hackthaon Project 
 
-Rex is a platform to post or accept any time of jobs with guaranteed pay. 
+Rico is a platform to post or accept any type of jobs with guaranteed pay. 
 
-# Run Instructions 
+Live Demo Link: 
+
+# RazorPay APIs Used 
+
+1. Standard Integration 
+2. Refund 
+3. PayOuts (RazerPayX)
+
+# Run Instructions For Rex (Our Backend Server)
 
 Install Python
 Create virtual env
