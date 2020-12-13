@@ -1,5 +1,10 @@
 # MonadArmy
-RAZORPAY FTX HACKATHON 
+
+RazorPay Hackthaon Project 
+
+Rex is a platform to post or accept any time of jobs with guaranteed pay. 
+
+# Run Instructions 
 
 Install Python
 Create virtual env

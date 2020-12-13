@@ -36,6 +36,7 @@ def create():
     utils.nullCheck(location,"location")
     
     db = get_db()
+    cursor = db.cursor()
 
     user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
     
@@ -52,16 +53,20 @@ def create():
 
     query = 'INSERT into JOB (user_id,title,location,detail,category,price,poster,payment_status,otp,is_complete) VALUES (?,?,?,?,?,?,?,?,?,?)'
     try:
-        db.execute(query,(int(current_identity),title,location,detail,category,amount,name,"initiated",otp,0))
+        cursor.execute(query,(int(current_identity),title,location,detail,category,amount,name,"initiated",otp,0))
         db.commit()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
         errorResponse = responses.createResponse('x9001','Contraint Failure')
         return make_response(jsonify(errorResponse)),500
 
+    # job_id_q = db.execute('select last_insert_rowid() as id')
+    # job_id = job_id_q['id']    
+
     body = {
         "payment_status" : "initiated",
-        "otp" : otp
+        "otp" : otp,
+        "job_id" : cursor.lastrowid
     }
 
     responseObject = {
