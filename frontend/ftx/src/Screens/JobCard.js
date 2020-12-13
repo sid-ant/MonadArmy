@@ -6,16 +6,38 @@ import { GoCheck } from "react-icons/go";
 import { HiCurrencyRupee } from "react-icons/hi";
 import { AiOutlineTool } from "react-icons/ai";
 import OtpInput from "react-otp-input";
+import { TiTick } from "react-icons/ti";
 
 class JobCard extends Component {
   constructor() {
     super();
-    this.state = { show_otp: false, otp: "" };
+    this.state = { show_otp: false, otp: "", payReceived: false };
   }
-
   completeJob = () => {
     console.log("completed Job id" + this.props.job_id);
     this.setState({ ...this.state, show_otp: true });
+  };
+
+  finishJob = () => {
+    var self = this;
+    var otp = document.getElementById("partitioned").value;
+    fetch("https://sleepy-wildwood-72790.herokuapp.com/txn/payout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: localStorage.getItem("session_info"),
+      },
+      body: JSON.stringify({ job_id: this.props.job_id, otp: otp }),
+    })
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (data) {
+        if (data.status == "200") {
+          self.setState({ ...self.state, payReceived: true });
+          window.location.reload();
+        }
+      });
   };
   handleChange = (otp) => this.setState({ ...this.state, otp });
   acceptJob = () => {
@@ -32,7 +54,7 @@ class JobCard extends Component {
       })
       .then(function (data) {
         if (data.status == "200") {
-          window.location.reload();
+          setTimeout(() => window.location.reload(), 2000);
         }
       });
 
@@ -40,6 +62,30 @@ class JobCard extends Component {
   };
 
   render() {
+    if (this.state.payReceived) {
+      return (
+        <div style={{ textAlign: "center", fontSize: "20px" }}>
+          <TiTick style={{ fontSize: "70px", marginTop: "40%" }} />
+          <br />
+          <br />
+          Payment Received Successfully.
+          <br />
+          <span style={{ fontSize: "12px" }}>
+            Redirecting You Please Wait...
+          </span>
+          <br />
+          <img
+            style={{
+              width: "150px",
+              marginTop: "5%",
+            }}
+            src={
+              "https://thumbs.gfycat.com/GrippingReflectingBasenji-size_restricted.gif"
+            }
+          />
+        </div>
+      );
+    }
     if (this.state.show_otp) {
       return (
         <Card
@@ -94,7 +140,7 @@ class JobCard extends Component {
               }}
             >
               <Button
-                onClick={() => this.completeJob()}
+                onClick={() => this.finishJob()}
                 variant="primary"
                 style={{
                   border: "0px",
