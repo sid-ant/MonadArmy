@@ -10,7 +10,64 @@ class MyJobCard extends Component {
   constructor() {
     super();
   }
+  componentDidMount (){
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js"
+    script.async = true;
+    document.body.appendChild(script);
+}
 
+handleClick(e) {
+    // e.preventDefault();
+    console.log('The link was clicked.');
+
+    let job_id = this.props.job_id;
+    let amount = this.props.price;
+    
+
+    fetch('https://sleepy-wildwood-72790.herokuapp.com/txns/create',{
+            method : "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('session_info')
+              },
+              body: JSON.stringify({amount:amount, job_id:job_id})
+        })
+        .then(function(res){ return res.json(); })
+        .then(function(data){ 
+          if(data.status =="200"){
+            var options = {
+                "key": "rzp_test_AL8RkobytmhhFR", // Enter the Key ID generated from the Dashboard
+                "amount": amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                "currency": "INR",
+                "name": "Rico",
+                "description": "Test Transaction",
+                "image": "https://example.com/your_logo",
+                "order_id": data.body.order_id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                "callback_url":  "/successtxn",
+                "prefill": {
+                    "name": "Gaurav Kumar",
+                    "email": "gaurav.kumar@example.com",
+                    "contact": "7417418249"
+                },
+                "notes": {
+                    "address": "Razorpay Corporate Office"
+                },
+                "theme": {
+                    "color": "#252b29"
+                }
+            };
+            var rzp1 = new window.Razorpay(options);
+            document.getElementById('rzp-button1').onclick = function(e){
+                rzp1.open();
+                e.preventDefault();
+            }
+         }else{
+           console.log("error",data)
+         }
+        })
+
+  }
   render() {
     return (
       <Card
@@ -145,7 +202,7 @@ class MyJobCard extends Component {
             }}
           >
             <Button
-              onClick={() => this.completeJob()}
+              onClick={() => this.handleClick()}
               variant="primary"
               style={{
                 border: "0px",
@@ -162,7 +219,7 @@ class MyJobCard extends Component {
               &nbsp;Pay
             </Button>
             &nbsp;&nbsp;
-            <Button
+            {/* <Button
               variant="primary"
               style={{
                 border: "0px",
@@ -178,7 +235,7 @@ class MyJobCard extends Component {
                 style={{ position: "relative", top: "2px", color: "black" }}
               />
               &nbsp;Delete
-            </Button>
+            </Button> */}
           </div>
           {/* Show location and accept button */}
         </Card.Body>

@@ -47,7 +47,8 @@ class NewJob extends Component {
         return res.json();
       })
       .then(function (data) {
-        self.setState({ ...self.state, goBack: true });
+        window.location.href = "/success"
+        // self.setState({ ...self.state, goBack: true });
       });
   };
 
