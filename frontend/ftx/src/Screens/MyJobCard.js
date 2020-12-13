@@ -25,7 +25,7 @@ handleClick(e) {
     let amount = this.props.price;
     
 
-    fetch('https://sleepy-wildwood-72790.herokuapp.com/txns/create',{
+    fetch('https://sleepy-wildwood-72790.herokuapp.com/txn/create',{
             method : "POST",
             headers: {
                 'Content-Type': 'application/json',
@@ -36,6 +36,8 @@ handleClick(e) {
         .then(function(res){ return res.json(); })
         .then(function(data){ 
           if(data.status =="200"){
+            window.txn_id = data.body.txn_id;
+            window.job_id = data.body.job_id;
             var options = {
                 "key": "rzp_test_AL8RkobytmhhFR", // Enter the Key ID generated from the Dashboard
                 "amount": amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
@@ -44,7 +46,19 @@ handleClick(e) {
                 "description": "Test Transaction",
                 "image": "https://example.com/your_logo",
                 "order_id": data.body.order_id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-                "callback_url":  "/successtxn",
+                "handler": function (response){
+                  fetch('https://sleepy-wildwood-72790.herokuapp.com/txn/update',{
+            method : "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('session_info')
+              },
+              body: JSON.stringify({txn_id:window.txn_id, job_id:window.job_id,razorpay_payment_id:response.razorpay_payment_id,razorpay_order_id:response.razorpay_order_id,razorpay_signature:response.razorpay_signature})
+        })
+        .then(function(res){ return res.json(); })
+        .then(function(data){window.location.href = "/successtxn" })
+                
+              },
                 "prefill": {
                     "name": "Gaurav Kumar",
                     "email": "gaurav.kumar@example.com",
@@ -58,10 +72,8 @@ handleClick(e) {
                 }
             };
             var rzp1 = new window.Razorpay(options);
-            document.getElementById('rzp-button1').onclick = function(e){
-                rzp1.open();
-                e.preventDefault();
-            }
+            rzp1.open();
+            
          }else{
            console.log("error",data)
          }
@@ -120,7 +132,7 @@ handleClick(e) {
               </div>
             ) : this.props.is_accepted ? (
               <div>
-                In Progress
+                Job Active
                 <div
                   style={{
                     position: "absolute",

@@ -9,7 +9,9 @@ class Status extends Component {
   constructor() {
     super();
   }
-
+  componentDidMount(){
+    setTimeout(function() { window.location.href= '/success' }, 5000);
+  }
   render() {
     return (
       <div style={{ textAlign: "center", fontSize: "20px" }}>
