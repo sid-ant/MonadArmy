@@ -34,12 +34,13 @@ def register():
         return make_response(jsonify(responseObject)),400
     
     db = get_db()
+    cursor = db.cursor()
 
-    if db.execute('SELECT user_id FROM user WHERE email = ?', (email,)).fetchone() is not None:
+    if cursor.execute('SELECT user_id FROM user WHERE email = ?', (email,)).fetchone() is not None:
         responseObject['status']="user already exists"
         return make_response(jsonify(responseObject)),400
 
-    db.execute(
+    cursor.execute(
                 'INSERT INTO user (email, password, name,phone,upi) VALUES (?, ?,?,?,?)',
                 (email, generate_password_hash(password),name,phone,upi)
             )
@@ -64,8 +65,9 @@ def login():
         return make_response(jsonify(responseObject)),400
     
     db = get_db()
+    cursor = db.cursor()
 
-    user =  db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
+    user =  cursor.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
 
     if user is None or check_password_hash(user['password'],password) is False:
         responseObject['status']="authentication failure"

@@ -1,12 +1,10 @@
 import React from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 
-
-
 import SignUp from "./Screens/SignUp";
 import Home from "./Screens/Home";
 import NewJob from "./Screens/NewJob";
-import MyJobCard from "./Screens/MyJobCard";
+import Status from "./Screens/Status";
 import PostedJob from "./Screens/PostedJob";
 
 const PrivateRoute = ({ isLogged, component: Comp, ...rest }) => {
@@ -30,7 +28,7 @@ const Routes = (props) => {
         <Route path="/login" exact component={SignUp} />
         <Route path="/new" exact component={NewJob} />
         <Route path="/success" exact component={PostedJob} />
-        <Route path="/successtxn" exact component={PostedJob} />        
+        <Route path="/successtxn" exact component={Status} />
         <Route path="/" exact component={SignUp} />
         {/* <PrivateRoute isLogged={props.auth} path="/dashboard" exact component={Dashboard} /> */}
       </Switch>
