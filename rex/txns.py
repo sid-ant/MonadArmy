@@ -139,7 +139,7 @@ def payout():
     job_details = cursor.execute('SELECT * FROM job WHERE job_id = ?',(int(job_id),)).fetchone()
     
     if job_details is None:
-        errResp = responses.createResponse('400','Job id Not Found: Please report this to us' + job_id)
+        errResp = responses.createResponse('400','Job id Not Found: Please report this to us' + str(job_id))
         return make_response(jsonify(errResp)),400
     
     if job_details['otp'] != otp:
