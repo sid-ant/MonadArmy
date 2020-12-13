@@ -28,6 +28,7 @@ def create():
     utils.nullCheck(job_id,"job_id") # String  
 
     db = get_db()
+    cursor = db.cursor()
 
     url = 'https://api.razorpay.com/v1/orders'
 
@@ -57,7 +58,7 @@ def create():
 
     query = 'INSERT into TXNS (amount,order_id,order_status,job_id,txn_type) VALUES (?,?,?,?,?)'
     try:
-        db.execute(query,(amount,order_id,order_status,job_id,txn_type))
+        cursor.execute(query,(amount,order_id,order_status,job_id,txn_type))
         db.commit()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
@@ -66,7 +67,8 @@ def create():
     
     body = {
         "order_id" : order_id,
-        "job_id" : job_id
+        "job_id" : job_id, 
+        "txn_id" :  cursor.lastrowid
     }
 
     responseObject = {
@@ -76,4 +78,39 @@ def create():
     }
     return make_response(jsonify(responseObject)),201
 
+@bp.route('/update',methods=['POST'])
+@login_required
+def update():
+    req =  request.get_json()
     
+    success = req.get("success")
+    utils.nullCheck(success,"success") # String  
+
+    job_id = req.get("job_id")
+    utils.nullCheck(job_id,"job_id") # String  
+
+
+    txn_id = req.get("txn_id")
+    utils.nullCheck(txn_id,"txn_id") # String  
+
+    db = get_db()
+    cursor = db.cursor()
+
+
+    order_status = "APPROVED" if success else "FAILED"
+    payment_status = 1 if success else 0 
+
+
+    updateJobs = 'UPDATE job SET payment_status =? WHERE job_id =?'
+    updateTxns = 'UPDATE txns SET order_status =? WHERE txn_id=?' 
+    try:
+        cursor.execute(updateJobs,(payment_status,job_id))
+        cursor.execute(updateTxns,(order_status,txn_id))
+        db.commit()
+    except sqlite3.Error as er:
+        current_app.logger.debug("SQL Lite Error : %s",er)
+        errorResponse = responses.createResponse('x9001','SQL Failure')
+        return make_response(jsonify(errorResponse)),500
+
+    resp = responses.createResponse('200','Job marked '+order_status)
+    return make_response(jsonify(resp)),500
