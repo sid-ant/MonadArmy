@@ -31,8 +31,11 @@ class JobCard extends Component {
         return res.json();
       })
       .then(function (data) {
-        console.log(data);
+        if (data.status == "200") {
+          window.location.reload();
+        }
       });
+
     console.log("Accepted Job id" + this.props.job_id);
   };
 
