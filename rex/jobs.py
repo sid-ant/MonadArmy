@@ -38,7 +38,7 @@ def create():
     db = get_db()
     cursor = db.cursor()
 
-    user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
+    user_details = cursor.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
     
     if user_details is None:
         errResp = responses.createResponse('500','User Account Not Found: Please report this to us')
@@ -48,7 +48,7 @@ def create():
 
     name = user_details['name'] # String
 
-    otp = random.randrange(0000,9999)
+    otp = random.randrange(1000,9999)
 
 
     query = 'INSERT into JOB (user_id,title,location,detail,category,price,poster,payment_status,otp,is_complete) VALUES (?,?,?,?,?,?,?,?,?,?)'
@@ -60,7 +60,7 @@ def create():
         errorResponse = responses.createResponse('x9001','Contraint Failure')
         return make_response(jsonify(errorResponse)),500
 
-    # job_id_q = db.execute('select last_insert_rowid() as id')
+    # job_id_q = cursor.execute('select last_insert_rowid() as id')
     # job_id = job_id_q['id']    
 
     body = {
@@ -81,8 +81,9 @@ def create():
 def fetch():
     req =  request.get_json()
     db = get_db()
+    cursor = db.cursor()
 
-    user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
+    user_details = cursor.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
     
     if user_details is None:
         errResp = responses.createResponse('500','User Account Not Found: Please report this to us')
@@ -94,7 +95,7 @@ def fetch():
     query = 'SELECT * FROM JOB WHERE worker = ? AND is_complete = 0 AND is_accepted = 1'
     data = None
     try:
-        data = db.execute(query,(int(current_identity),)).fetchall()
+        data = cursor.execute(query,(int(current_identity),)).fetchall()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
         errorResponse = responses.createResponse('x9001','Contraint Failure')
@@ -106,7 +107,7 @@ def fetch():
         query = 'SELECT * FROM JOB WHERE user_id != ? AND is_complete = 0 AND is_accepted = 0'
         print((int(current_identity),))
         try:
-            data = db.execute(query,(int(current_identity),)).fetchall()
+            data = cursor.execute(query,(int(current_identity),)).fetchall()
             print(len(data))
         except sqlite3.Error as er:
             current_app.logger.debug("SQL Lite Error : %s",er)
@@ -145,8 +146,10 @@ def fetch():
 def refresh():
     req =  request.get_json()
     db = get_db()
+    cursor = db.cursor()
 
-    user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
+
+    user_details = cursor.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
     
     if user_details is None:
         errResp = responses.createResponse('500','User Account Not Found: Please report this to us')
@@ -160,7 +163,7 @@ def refresh():
     data = None
     try:
         print(user_id)
-        data = db.execute(query,(int(current_identity),)).fetchall()
+        data = cursor.execute(query,(int(current_identity),)).fetchall()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
         errorResponse = responses.createResponse('x9001','Contraint Failure')
@@ -205,8 +208,10 @@ def accept():
     utils.nullCheck(job_id,"job_id")
     
     db = get_db()
+    cursor = db.cursor()
 
-    user_details = db.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
+
+    user_details = cursor.execute('SELECT * FROM user WHERE user_id = ?',(int(current_identity),)).fetchone()
     
     if user_details is None:
         errResp = responses.createResponse('500','User Account Not Found: Please report this to us')
@@ -217,7 +222,7 @@ def accept():
 
     query = 'Update JOB SET is_accepted = 1, worker = '+str(user_details['user_id']) + ' WHERE  job_id = '+ str(job_id)
     try:
-        db.execute(query)
+        cursor.execute(query)
         db.commit()
     except sqlite3.Error as er:
         current_app.logger.debug("SQL Lite Error : %s",er)
