@@ -17,9 +17,6 @@ class PostedJob extends Component {
   }
 
   componentDidMount() {
-    setTimeout(() => this.setState({ ...this.state, loading: false }), 1000);
-
-    //setTimeout(() => this.setState({ ...this.state, loading: false }), 1000);
     let self = this;
     if (!this.state.isApiLoaded) {
       fetch("https://sleepy-wildwood-72790.herokuapp.com/jobs/refresh", {
