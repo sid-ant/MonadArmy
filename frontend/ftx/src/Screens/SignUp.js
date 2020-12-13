@@ -37,7 +37,8 @@ class SignUp extends Component {
         nameD.length > 0 &&
         emailD.length > 0 &&
         passD.length > 0 &&
-        upiD.length > 0
+        upiD.length > 0 &&
+        phoneD.length>0
       ) {
         var data;
         if (phoneD.length > 0) {
@@ -241,7 +242,7 @@ class SignUp extends Component {
                     ></input>
                   </div>
                   <div className="form-group">
-                    <label>Phone</label>
+                    <label>Phone*</label>
                     <input
                       type="tel"
                       className="form-control"
